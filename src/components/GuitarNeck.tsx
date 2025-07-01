@@ -7,14 +7,12 @@ type GuitarNeckProps = {
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
-// Convert "E2" => { note: "E", octave: 2 }
 const parseNote = (noteStr: string) => {
     const match = noteStr.match(/^([A-G]#?)(\d)$/);
     if (!match) return { note: "E", octave: 2 };
     return { note: match[1], octave: parseInt(match[2], 10) };
 };
 
-// Get the note n frets above a starting note
 const transpose = (note: string, steps: number) => {
     const index = NOTE_NAMES.indexOf(note);
     return NOTE_NAMES[(index + steps) % 12];
@@ -28,53 +26,68 @@ export const GuitarNeck: React.FC<GuitarNeckProps> = ({ tunings, frets }) => {
     const height = stringCount * stringHeight;
 
     return (
-        <svg width={width} height={height} className="bg-yellow-50 rounded shadow-md">
-            {/* Frets (vertical lines) */}
+        <svg width={width + 40} height={height + 40} className="bg-[#f8f5f1] rounded shadow-md">
+            {/* Fond bois clair */}
+            <rect x={0} y={0} width={width + 40} height={height + 40} fill="#e0cba8" />
+
+            {/* Frets */}
             {Array.from({ length: frets + 1 }).map((_, i) => (
                 <line
                     key={`fret-${i}`}
-                    x1={i * fretWidth}
-                    y1={0}
-                    x2={i * fretWidth}
-                    y2={height}
-                    stroke="#aaa"
-                    strokeWidth={i === 0 ? 4 : 2}
+                    x1={20 + i * fretWidth}
+                    y1={20}
+                    x2={20 + i * fretWidth}
+                    y2={20 + height}
+                    stroke="#8b8b8b"
+                    strokeWidth={i === 0 ? 5 : 2}
                 />
             ))}
 
-            {/* Strings (horizontal lines) */}
+            {/* Repères de touche (dots) sur les frettes 3 et 5 */}
+            {[2, 4].map((fretIdx) => (
+                <circle
+                    key={`dot-${fretIdx}`}
+                    cx={20 + fretIdx * fretWidth + fretWidth / 2}
+                    cy={20 + height / 2}
+                    r={6}
+                    fill="#444"
+                    opacity={0.4}
+                />
+            ))}
+
+            {/* Cordes */}
             {tunings.map((tuning, idx) => {
-                const y = idx * stringHeight + stringHeight / 2;
+                const y = 20 + idx * stringHeight + stringHeight / 2;
                 return (
                     <line
                         key={`string-${idx}`}
-                        x1={0}
+                        x1={20}
                         y1={y}
-                        x2={width}
+                        x2={20 + width}
                         y2={y}
-                        stroke="#444"
+                        stroke="#222"
                         strokeWidth={1.5}
                     />
                 );
             })}
 
-            {/* Notes on each fret */}
+            {/* Notes */}
             {tunings.map((tuning, stringIdx) => {
                 const { note: baseNote } = parseNote(tuning);
-                const y = stringIdx * stringHeight + stringHeight / 2;
+                const y = 20 + stringIdx * stringHeight + stringHeight / 2;
 
                 return Array.from({ length: frets }).map((_, fretIdx) => {
                     const note = transpose(baseNote, fretIdx);
-                    const x = fretIdx * fretWidth + fretWidth / 2;
+                    const x = 20 + fretIdx * fretWidth + fretWidth / 2;
 
                     return (
                         <text
                             key={`note-${stringIdx}-${fretIdx}`}
                             x={x}
-                            y={y + 5}
+                            y={y + 4}
                             textAnchor="middle"
-                            fontSize="12"
-                            fill="#222"
+                            fontSize="11"
+                            fill="#000"
                         >
                             {note}
                         </text>
